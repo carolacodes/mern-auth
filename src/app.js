@@ -3,8 +3,13 @@ import morgan from "morgan";
 import authRoutes from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route.js";
+import cors from "cors";
 
 const app = express();
+//CORS
+app.use(cors({
+    origin: 'http://localhost:5173', // Reemplaza con el origen de tu frontend
+}))
 //Middlewares
 app.use(morgan("dev"));
 app.use(express.json());

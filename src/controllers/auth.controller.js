@@ -5,13 +5,17 @@ import { generateToken } from "../libs/jwt.js"
 export const register = async (req, res) => {
     const {username, email, password} = req.body
     try {
+
+        const userFound = await findUserByEmail(email)
+        if(userFound) return res.status(400).json(["ERROR user already exists"])
+
         //Hash Password
         const salt = await bcrypt.genSalt(10)
         const passwordHash = await bcrypt.hash(password, salt)
 
         const userCreated = await createUser({username, email, password: passwordHash})
         if(!userCreated) {
-            return res.status(400).json({message: "ERROR creating user"})
+            return res.status(400).json("ERROR creating user")
         }
         console.log("Username: "+userCreated.username, "Email: "+userCreated.email)
         const token = generateToken(userCreated._id)
@@ -41,12 +45,12 @@ export const login = async (req, res) => {
         const {email, password} = req.body
 
         const userFound = await findUserByEmail(email)
-        if(!userFound) return res.status(400).json({message: "User not found"})
+        if(!userFound) return res.status(400).json("User not found")
         
         const isMatch = await bcrypt.compare(password, userFound.password)
 
-        if(!isMatch) return res.status(401).json({message: "Invalid password"})
-        
+        if(!isMatch) return res.status(401).json("Invalid password")
+
         const token = generateToken(userFound._id)
 
         // 👇 Cookie con el token
@@ -72,17 +76,17 @@ export const login = async (req, res) => {
 
 export const logout = (req, res) => {
     res.clearCookie("token"); //limpiamos cookie que contiene el token 
-    return res.status(200).json({ message: "Logout successful" });
+    return res.status(200).json("Logout successful");
 }
 
 export const profile = async (req, res) => {
     try {
         const idUser = req.user.id
-        if(!idUser) return res.status(401).json({message: "Unauthorized"})
+        if(!idUser) return res.status(401).json("Unauthorized")
         
         const userFindById = await findUserById(idUser)
-        if(!userFindById) return res.status(404).json({message: "User not found"})
-        
+        if(!userFindById) return res.status(404).json("User not found")
+
         return res.status(200).json({
             id: userFindById._id,
             username: userFindById.username,
