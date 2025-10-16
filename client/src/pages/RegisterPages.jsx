@@ -1,7 +1,7 @@
 import {useForm} from 'react-hook-form'
 import {useAuth} from '../hook/useAuth'
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate , Link} from 'react-router-dom'
 function RegisterPages(){
     const {register, handleSubmit, formState: { errors }} = useForm()
     const {user, signup, isAuth, error : registerError} = useAuth()
@@ -38,6 +38,7 @@ function RegisterPages(){
                         Register
                     </button>
                 </form>
+                <p>Already have an account? <Link to="/login">Log in</Link></p>
             </div>
         </>
     )
