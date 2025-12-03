@@ -9,6 +9,7 @@ const app = express();
 //CORS
 app.use(cors({
     origin: 'http://localhost:5173', // Reemplaza con el origen de tu frontend
+    credentials: true // Habilita el envío de cookies
 }))
 //Middlewares
 app.use(morgan("dev"));
@@ -16,6 +17,6 @@ app.use(express.json());
 app.use(cookieParser()); // 👈 habilita req.cookies
 //Routes
 app.use("/api",authRoutes);
-app.use("/api",userRoutes);
+app.use("/api/users",userRoutes);
 
 export default app;

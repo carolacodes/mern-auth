@@ -10,10 +10,12 @@ export async function getUserById(id){
     }
 }
 
-export async function updateUser({username, email, password, id}) {
+export async function updateUser(id, updateData) {
     try {
-        const userUpdated = await User.findByIdAndUpdate(id, { username, email, password }, { new: true });
-        return userUpdated;
+        const userUpdated = await User.findByIdAndUpdate(id, updateData, {
+            new: true,
+        });
+    return userUpdated;
     } catch (error) {
         throw new Error('Error updating user');
     }

@@ -1,11 +1,19 @@
 import {useForm} from 'react-hook-form'
 import {useAuth} from '../hook/useAuth'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
+import { useEffect } from 'react'
 
 function LoginPages(){
     const {register, handleSubmit, formState: {errors}} = useForm()
-    const {signin, error : signinError} = useAuth()
+    const {signin, error : signinError, isAuth} = useAuth()
+    const navigate = useNavigate()
+
     const onSubmit = handleSubmit(data => signin(data))
+
+    // ⬇️ ESTE EFECTO ES LO QUE TE FALTABA
+    useEffect(() => {
+        if (isAuth) navigate('/profile')
+    }, [isAuth])
     return (
         <>
         <h1>Login</h1>

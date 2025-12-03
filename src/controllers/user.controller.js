@@ -22,25 +22,44 @@ export const getUserController = async (req, res) => {
 }
 
 export const updateUserController = async (req, res) => {
-    const { username, email, password } = req.body;
-    try {
-        // El ID viene del token decodificado en el middleware
+        try {
         const userId = req.user.id;
+        const { username, email, password } = req.body;
 
-        //Hash Password
-        const salt = await bcrypt.genSalt(10)
-        const passwordHash = await bcrypt.hash(password, salt)
+        // Armamos un objeto SOLO con los campos que realmente vienen
+        const updateData = {};
 
-        const userUpdated = await updateUser({id: userId, username, email, password: passwordHash});
-        if(!userUpdated) return res.status(404).json({message: "User not found"})
-        return res.status(200).json({message: "User updated", 
-        user: {
-            id: userUpdated._id,
-            username: userUpdated.username,
-            email: userUpdated.email,
-        }})
-    }catch(error){
-        return res.status(500).json({message: error.message})
+        if (username !== undefined) updateData.username = username;
+        if (email !== undefined) updateData.email = email;
+
+        if (password !== undefined && password !== "") {
+            const salt = await bcrypt.genSalt(10);
+            const passwordHash = await bcrypt.hash(password, salt);
+            updateData.password = passwordHash;
+        }
+
+        // Si no hay nada para actualizar
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: "No fields to update" });
+        }
+
+        const userUpdated = await updateUser(userId, updateData);
+
+        if (!userUpdated) return res.status(404).json({ message: "User not found" });
+
+        return res.status(200).json({
+            message: "User updated",
+            user: {
+                id: userUpdated._id,
+                username: userUpdated.username,
+                email: userUpdated.email,
+                createdAt: userUpdated.createdAt,
+                updatedAt: userUpdated.updatedAt,
+            },
+        });
+    } catch (error) {
+        console.error("❌ Error in updateUserController:", error);
+        return res.status(500).json({ message: error.message });
     }
 } 
 

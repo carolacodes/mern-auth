@@ -1,22 +1,49 @@
+import { ZodError } from "zod";
+
 export const validateSchema = (schema) => (req, res, next) => {
     try {
-        const result = schema.safeParse(req.body)
-        if (!result.success) {
-            const issues = result.error.issues.map(i => ({
-            path: i.path.join("."),
-            message: i.message,
-            }));
-            return res.status(422).json({ message: "Validation error", issues });
+        // 🔍 Sanity check: aseguramos que pasaste un schema válido
+        if (!schema || typeof schema.safeParse !== "function") {
+        console.error("❌ validateSchema: schema inválido o undefined");
+        return res.status(500).json({
+            message: "Internal validation middleware error (invalid schema)",
+        });
         }
-        //Datos transformados (trim, toLowerCase, etc.)
+
+        const result = schema.safeParse(req.body);
+
+        if (!result.success) {
+        const issues = (result.error.issues ?? []).map((i) => ({
+            path: Array.isArray(i.path) ? i.path.join(".") : "",
+            message: i.message || "Invalid field",
+        }));
+
+        return res.status(422).json({
+            message: "Validation error",
+            issues,
+        });
+        }
+
+        // Datos ya validados / transformados
         req.body = result.data;
-        next()
-    }catch(error){
+        return next();
+    } catch (error) {
         console.error("❌ Error in validateSchema:", error);
 
-        // Si el fallo no es de validación, devolvemos un error genérico
+        if (error instanceof ZodError) {
+        const issues = (error.issues ?? []).map((i) => ({
+            path: Array.isArray(i.path) ? i.path.join(".") : "",
+            message: i.message || "Invalid field",
+        }));
+
+        return res.status(422).json({
+            message: "Validation error",
+            issues,
+        });
+        }
+
         return res.status(500).json({
         message: "Internal validation middleware error",
         });
     }
-}
+};

@@ -1,6 +1,8 @@
 import { createUser, findUserByEmail , findUserById} from "../services/auth.service.js"
 import bcrypt from "bcryptjs"
 import { generateToken } from "../libs/jwt.js"
+import jwt from "jsonwebtoken"
+import User from "../models/user.model.js"
 
 export const register = async (req, res) => {
     const {username, email, password} = req.body
@@ -22,10 +24,10 @@ export const register = async (req, res) => {
 
         // 👇 Seteamos la cookie con el token
         res.cookie("token", token, {
-            httpOnly: true,     // 🔒 evita acceso por JS (seguridad XSS)
-            secure: false,      // true si usás HTTPS
-            sameSite: "strict", // previene CSRF
-            maxAge: 1000 * 60 * 60, // 1 hora
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax", // o "none" + secure:true cuando uses HTTPS
+            maxAge: 1000 * 60 * 60,
         });
 
         return res.status(201).json({
@@ -57,8 +59,8 @@ export const login = async (req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: false,
-            sameSite: "strict",
-            maxAge: 1000 * 60 * 60, // 1 hora
+            sameSite: "lax", // o "none" + secure:true cuando uses HTTPS
+            maxAge: 1000 * 60 * 60,
         });
 
         return res.status(201).json({
@@ -97,4 +99,38 @@ export const profile = async (req, res) => {
     }catch (error) {
         return res.status(500).json({message: error.message})
     }
+}
+
+export const verifyToken = async (req, res) => {
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.status(401).json("Not authorized");
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+
+    jwt.verify(token, jwtSecret, async (err, decoded) => {
+        if (err) {
+        return res.status(401).json("Not authorized");
+        }
+
+        // si tu token se genera con { sub: userId }
+        const userId = decoded.sub;
+
+        try {
+        const userFound = await User.findById(userId);
+        if (!userFound) {
+            return res.status(401).json("Not authorized");
+        }
+
+        return res.status(200).json({
+            id: userFound._id,
+            username: userFound.username,
+            email: userFound.email,
+        });
+        } catch (error) {
+        return res.status(500).json({ message: error.message });
+        }
+    });
 }
