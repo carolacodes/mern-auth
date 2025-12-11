@@ -24,10 +24,10 @@ export const register = async (req, res) => {
 
         // 👇 Seteamos la cookie con el token
         res.cookie("token", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax", // o "none" + secure:true cuando uses HTTPS
-            maxAge: 1000 * 60 * 60,
+            httpOnly: true, // significa que la cookie no es accesible desde JavaScript del lado del cliente solo en el servidor
+            secure: false, // true si usas HTTPS (en produccion), false si usas HTTP
+            sameSite: "strict", // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
+            maxAge: 1000 * 60 * 60, // duracion de la cookie
         });
 
         return res.status(201).json({
@@ -57,10 +57,10 @@ export const login = async (req, res) => {
 
         // 👇 Cookie con el token
         res.cookie("token", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax", // o "none" + secure:true cuando uses HTTPS
-            maxAge: 1000 * 60 * 60,
+            httpOnly: true, // significa que la cookie no es accesible desde JavaScript del lado del cliente solo en el servidor
+            secure: false, // true si usas HTTPS (en produccion), false si usas HTTP
+            sameSite: "strict", // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
+            maxAge: 1000 * 60 * 60, // duracion de la cookie 
         });
 
         return res.status(201).json({
