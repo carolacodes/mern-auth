@@ -7,15 +7,22 @@ import User from "../models/user.model.js"
 export const register = async (req, res) => {
     const {username, email, password} = req.body
     try {
-
-        const userFound = await findUserByEmail(email)
+        if (!username || !email || !password) {
+        return res.status(400).json({ message: "Missing fields" })
+        }
+        const usernameNorm = username.trim()
+        const emailNorm = email.trim().toLowerCase()
+        const userFound = await findUserByEmail(emailNorm)
         if(userFound) return res.status(400).json(["ERROR user already exists"])
-
+        
         //Hash Password
         const salt = await bcrypt.genSalt(10)
         const passwordHash = await bcrypt.hash(password, salt)
 
-        const userCreated = await createUser({username, email, password: passwordHash})
+        const userCreated = await createUser({
+                                            username: usernameNorm,
+                                            email: emailNorm,
+                                            password: passwordHash})
         if(!userCreated) {
             return res.status(400).json("ERROR creating user")
         }
@@ -30,7 +37,8 @@ export const register = async (req, res) => {
             sameSite: isProd ? "none" : "lax", // none para Vercel<->Render, lax para local, // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
             maxAge: 1000 * 60 * 60, // duracion de la cookie
         });
-
+        console.log("REGISTER BODY:", req.body)
+        console.log("EMAIL NORM:", emailNorm)
         return res.status(201).json({
             user: {
                 id: userCreated._id,
@@ -44,12 +52,18 @@ export const register = async (req, res) => {
 }
 
 export const login = async (req, res) => {
+    const {email, password} = req.body
     try{
-        const {email, password} = req.body
-
-        const userFound = await findUserByEmail(email)
+        if (!email || !password) {
+            return res.status(400).json({ message: "Missing fields" })
+        }
+        const emailNorm = email.trim().toLowerCase()
+        const userFound = await findUserByEmail(emailNorm)
         if(!userFound) return res.status(400).json("User not found")
         
+        if (!password || !userFound?.password) {
+            return res.status(400).json({ message: "Email or password missing" })
+        }
         const isMatch = await bcrypt.compare(password, userFound.password)
 
         if(!isMatch) return res.status(401).json("Invalid password")
@@ -64,7 +78,7 @@ export const login = async (req, res) => {
             sameSite: isProd ? "none" : "lax", // none para Vercel<->Render, lax para local, // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
             maxAge: 1000 * 60 * 60, // duracion de la cookie
         });
-
+        console.log("LOGIN BODY:", req.body)
         return res.status(201).json({
             user: {
                 id: userFound._id,
