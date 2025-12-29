@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Vite / caches
+.vite/
+.cache/
+tmp/
+
+# Coverage
+coverage/
+
+# TypeScript build info (si aplica)
+*.tsbuildinfo

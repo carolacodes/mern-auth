@@ -22,11 +22,12 @@ export const register = async (req, res) => {
         console.log("Username: "+userCreated.username, "Email: "+userCreated.email)
         const token = generateToken(userCreated._id)
 
+        const isProd = process.env.NODE_ENV === "production"
         // 👇 Seteamos la cookie con el token
         res.cookie("token", token, {
             httpOnly: true, // significa que la cookie no es accesible desde JavaScript del lado del cliente solo en el servidor
-            secure: false, // true si usas HTTPS (en produccion), false si usas HTTP
-            sameSite: "strict", // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
+            secure: isProd,                 // true en Render (https) // true si usas HTTPS (en produccion), false si usas HTTP
+            sameSite: isProd ? "none" : "lax", // none para Vercel<->Render, lax para local, // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
             maxAge: 1000 * 60 * 60, // duracion de la cookie
         });
 
@@ -55,12 +56,13 @@ export const login = async (req, res) => {
 
         const token = generateToken(userFound._id)
 
+        const isProd = process.env.NODE_ENV === "production"
         // 👇 Cookie con el token
         res.cookie("token", token, {
             httpOnly: true, // significa que la cookie no es accesible desde JavaScript del lado del cliente solo en el servidor
-            secure: false, // true si usas HTTPS (en produccion), false si usas HTTP
-            sameSite: "strict", // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
-            maxAge: 1000 * 60 * 60, // duracion de la cookie 
+            secure: isProd,                 // true en Render (https) // true si usas HTTPS (en produccion), false si usas HTTP
+            sameSite: isProd ? "none" : "lax", // none para Vercel<->Render, lax para local, // stric que solo se puede acceder al mismo dominio, lax permite cierto acceso cruzado, none permite todo (pero requiere secure:true)
+            maxAge: 1000 * 60 * 60, // duracion de la cookie
         });
 
         return res.status(201).json({
