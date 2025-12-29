@@ -1,40 +1,13 @@
-import User from '../models/user.model.js'
+import User from "../models/user.model.js";
 
-export async function createUser({username, email, password}) {
-    try {
-        const user = await User.create({username, email, password})
-        if(!user){
-            return null
-        }else{
-            return user
-        }
-    }catch(error){
-        return error.message
-    }
+export async function createUser({ username, email, password }) {
+    return await User.create({ username, email, password });
 }
 
-export async function findUserByEmail(email){
-    try {
-        const user = await User.findOne({email})
-        if(!user){
-            return null
-        }else{
-            return user
-        }
-    }catch(error){
-        return error.message
-    }
+export async function findUserByEmail(email) {
+    return await User.findOne({ email });
 }
 
-export async function findUserById(id){
-    try {
-        const userFound = await User.findById(id)
-        if(!userFound){
-            return null
-        }else{
-            return userFound
-        }
-    }catch(error){
-        return error.message
-    }
+export async function findUserById(id) {
+    return await User.findById(id);
 }
