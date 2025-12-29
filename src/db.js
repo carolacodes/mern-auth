@@ -1,12 +1,9 @@
 import mongoose from "mongoose";
-
 export const connectDB = async () => {
-  const uri = process.env.DB_CONNECTION; // o MONGODB_URI (ver abajo)
-
-    if (!uri) {
-        throw new Error("DB_CONNECTION is missing in environment variables");
+    try {
+        await mongoose.connect(process.env.DB_CONNECTION)
+        console.log(">>>>> DB connected <<<<<")
+    }catch(error){
+        console.log(error)
     }
-
-    await mongoose.connect(uri);
-    console.log(">>>>> DB connected <<<<<", mongoose.connection.name);
 };

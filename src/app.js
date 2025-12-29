@@ -7,23 +7,10 @@ import cors from "cors";
 
 const app = express();
 //CORS
-const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173"].filter(Boolean);
-
-app.use(
-    cors({
-        origin: allowedOrigins,
-        credentials: true,
-    })
-    );
-
-    // ✅ Preflight para todos los endpoints
-    app.options(
-    "*",
-    cors({
-        origin: allowedOrigins,
-        credentials: true,
-    })
-);
+app.use(cors({
+    origin: [process.env.CLIENT_URL, "http://localhost:5173"].filter(Boolean), //origin: 'http://localhost:5173', // Reemplaza con el origen de tu frontend
+    credentials: true // Habilita el envío de cookies
+}))
 //Middlewares
 app.use(morgan("dev"));
 app.use(express.json());
