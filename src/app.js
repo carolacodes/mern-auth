@@ -16,14 +16,11 @@ app.use(
     })
 )
 
-// ✅ Express 5: usar "/*" o regex, no "*"
-app.options(
-    "/*",
-    cors({
-        origin: allowedOrigins,
-        credentials: true,
-    })
-)
+// ✅ Express 5: responder preflight sin rutas con wildcard
+app.use((req, res, next) => {
+    if (req.method === "OPTIONS") return res.sendStatus(204)
+    next()
+})
 
 app.use(morgan("dev"))
 app.use(express.json())
